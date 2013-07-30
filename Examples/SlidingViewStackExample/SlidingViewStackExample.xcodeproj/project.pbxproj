@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E82AC66317A81334004D4AE9 /* SlidingViewStack.m in Sources */ = {isa = PBXBuildFile; fileRef = E82AC66217A81334004D4AE9 /* SlidingViewStack.m */; };
 		E8F9B3E0179EB4580032EEAC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F9B3DF179EB4580032EEAC /* UIKit.framework */; };
 		E8F9B3E2179EB4580032EEAC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F9B3E1179EB4580032EEAC /* Foundation.framework */; };
 		E8F9B3E4179EB4580032EEAC /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F9B3E3179EB4580032EEAC /* CoreGraphics.framework */; };
@@ -19,10 +20,11 @@
 		E8F9B41C179EB4830032EEAC /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = E8F9B40F179EB4830032EEAC /* ViewController_iPhone.xib */; };
 		E8F9B41D179EB4830032EEAC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F9B411179EB4830032EEAC /* main.m */; };
 		E8F9B41F179EB4830032EEAC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F9B415179EB4830032EEAC /* ViewController.m */; };
-		E8F9B423179EB4C70032EEAC /* SlidingViewStack.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F9B422179EB4C70032EEAC /* SlidingViewStack.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E82AC66117A81334004D4AE9 /* SlidingViewStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SlidingViewStack.h; sourceTree = "<group>"; };
+		E82AC66217A81334004D4AE9 /* SlidingViewStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SlidingViewStack.m; sourceTree = "<group>"; };
 		E8F9B3DC179EB4580032EEAC /* SlidingViewStackExampleExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlidingViewStackExampleExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8F9B3DF179EB4580032EEAC /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		E8F9B3E1179EB4580032EEAC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -40,8 +42,6 @@
 		E8F9B413179EB4830032EEAC /* SlidingViewStackExample-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SlidingViewStackExample-Prefix.pch"; sourceTree = "<group>"; };
 		E8F9B414179EB4830032EEAC /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		E8F9B415179EB4830032EEAC /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		E8F9B421179EB4C70032EEAC /* SlidingViewStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SlidingViewStack.h; sourceTree = "<group>"; };
-		E8F9B422179EB4C70032EEAC /* SlidingViewStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SlidingViewStack.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,10 +58,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E82AC66017A81334004D4AE9 /* SlidingViewStack */ = {
+			isa = PBXGroup;
+			children = (
+				E82AC66117A81334004D4AE9 /* SlidingViewStack.h */,
+				E82AC66217A81334004D4AE9 /* SlidingViewStack.m */,
+			);
+			name = SlidingViewStack;
+			path = ../../SlidingViewStack;
+			sourceTree = "<group>";
+		};
 		E8F9B3D3179EB4580032EEAC = {
 			isa = PBXGroup;
 			children = (
-				E8F9B420179EB4980032EEAC /* SlidingViewStack */,
+				E82AC66017A81334004D4AE9 /* SlidingViewStack */,
 				E8F9B405179EB4830032EEAC /* SlidingViewStackExample */,
 				E8F9B3DE179EB4580032EEAC /* Frameworks */,
 				E8F9B3DD179EB4580032EEAC /* Products */,
@@ -103,18 +113,7 @@
 				E8F9B414179EB4830032EEAC /* ViewController.h */,
 				E8F9B415179EB4830032EEAC /* ViewController.m */,
 			);
-			name = SlidingViewStackExample;
 			path = SlidingViewStackExample;
-			sourceTree = "<group>";
-		};
-		E8F9B420179EB4980032EEAC /* SlidingViewStack */ = {
-			isa = PBXGroup;
-			children = (
-				E8F9B421179EB4C70032EEAC /* SlidingViewStack.h */,
-				E8F9B422179EB4C70032EEAC /* SlidingViewStack.m */,
-			);
-			name = SlidingViewStack;
-			path = SlidingViewStack;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -187,7 +186,7 @@
 				E8F9B416179EB4830032EEAC /* AppDelegate.m in Sources */,
 				E8F9B41D179EB4830032EEAC /* main.m in Sources */,
 				E8F9B41F179EB4830032EEAC /* ViewController.m in Sources */,
-				E8F9B423179EB4C70032EEAC /* SlidingViewStack.m in Sources */,
+				E82AC66317A81334004D4AE9 /* SlidingViewStack.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
