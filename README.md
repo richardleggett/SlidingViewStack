@@ -10,6 +10,11 @@ Wrapping is also supported to allow the stack to loop when the last item is reac
 
 SlidingViewStack uses UITableView-style dataSource/delegate protocols for view loading and events and recylcles views internally for efficient memory use.
 
+Sample Output
+------------------
+
+![Output sample](https://github.com/richardleggett/SlidingViewStack/raw/master/SlidingViewStack.gif)
+
 ARC Compatibility
 ------------------
 
