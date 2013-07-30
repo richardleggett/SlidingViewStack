@@ -8,7 +8,7 @@ SlidingViewStack creates a z-ordered stack of views that users can scroll throug
 
 Wrapping is also supported to allow the stack to loop when the last item is reached, or when going backwards from the first item to the last.
 
-SlidingViewStack uses UITableView-style dataSource/delegate protocols for view loading and events and recylcles views internally for efficient memory use.
+SlidingViewStack uses UITableView-style dataSource/delegate protocols for view loading and events and recycles views internally for efficient memory use.
 
 Sample Output
 ------------------
