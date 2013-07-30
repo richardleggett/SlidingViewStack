@@ -36,9 +36,6 @@ static const float kDefaultScrollDecceleration = 5.0f;
 // at which we determine a drag to be a fling/flick when finger is released
 static const float kDefaultFlingThreshhold = 75.0f;
 
-// view tag for darken/overlay tag
-static const int kOverlayTag = 10000;
-
 
 @interface SlidingViewStack()
 
@@ -184,6 +181,12 @@ static const int kOverlayTag = 10000;
     }
     view.frame = CGRectMake(x, y, self.itemSize.width, self.itemSize.height);
     
+    // update child view/overlay view width/height
+    CGRect subviewFrame = CGRectMake(0, 0, view.frame.size.width, view.frame.size.height);
+    for (UIView * subview in view.subviews) {
+        subview.frame = subviewFrame;
+    }
+    
     [UIView setAnimationsEnabled:YES];
 }
 
@@ -253,16 +256,24 @@ static const int kOverlayTag = 10000;
 
 - (UIView *)loadViewAtIndex:(NSInteger)index
 {
-    BOOL isBeforeCurrentView = [self indexIsBeforeCurrentItemIndex:index];
-    
+    UIView *viewWrapper;
     UIView *reuseView = [self dequeueItemView];
-    UIView *view = [self.dataSource slidingViewStack:self
-                                    viewForItemAtIndex:index
-                                           reusingView:reuseView];
+    UIView *itemView = [self.dataSource slidingViewStack:self
+                                         viewForItemAtIndex:index
+                                                reusingView:[reuseView.subviews objectAtIndex:0]];
     
-    if (view == nil)
+    if(reuseView == nil)
     {
-        view = [UIView new];
+        viewWrapper = [UIView new];
+    }
+    else
+    {
+        viewWrapper = reuseView;
+    }
+    
+    if (itemView == nil)
+    {
+        itemView = [UIView new];
     }
     
     UIView *oldView = [self itemViewAtIndex:index];
@@ -272,36 +283,33 @@ static const int kOverlayTag = 10000;
         [oldView removeFromSuperview];
     }
     
-    [self setItemView:view forIndex:index];
-    [self setFrameForView:view atIndex:index];
+    [self setItemView:viewWrapper forIndex:index];
+    [self setFrameForView:viewWrapper atIndex:index];
     
-    // add darken layer
-    if(view != reuseView && [view viewWithTag:kOverlayTag])
+    // add original view and "darken overlay" view as subview of viewWrapper
+    if(reuseView == nil)
     {
-        NSLog(@"slidingViewStack invalid item view, item views must not contain a tag with %d", kOverlayTag);
-        return nil;
-    }
-    else
-    {
-        UIView *overlay = [[UIView alloc] initWithFrame:view.bounds];
+        [viewWrapper addSubview:itemView];
+        
+        UIView *overlay = [[UIView alloc] initWithFrame:itemView.bounds];
         overlay.backgroundColor = [UIColor blackColor];
         overlay.alpha = 0.0f;
-        overlay.tag = kOverlayTag;
-        [view addSubview:overlay];
+        [viewWrapper addSubview:overlay];
     }
-    UIView *overlay = [view viewWithTag:kOverlayTag];
+    UIView *overlay = [viewWrapper.subviews objectAtIndex:1];
     overlay.alpha = 0.0f;
     
+    BOOL isBeforeCurrentView = [self indexIsBeforeCurrentItemIndex:index];
     if(isBeforeCurrentView)
     {
-        [self addSubview:view];
+        [self addSubview:viewWrapper];
     }
     else
     {
-        [self insertSubview:view atIndex:0];
+        [self insertSubview:viewWrapper atIndex:0];
     }
     
-    return view;
+    return viewWrapper;
 }
 
 - (void)updateItemSizeAndCount
@@ -476,13 +484,14 @@ static const int kOverlayTag = 10000;
             // adjust darken view overlays based on amount showing 
             if(self.darkenViewBehind)
             {
+                UIView *overlay = [view.subviews objectAtIndex:1];
                 if(unclampedIndex>unclampedCurrentScrollIndex)
                 {
-                    [view viewWithTag:kOverlayTag].alpha = powf(normalizedOffset/1, 2);
+                    overlay.alpha = powf(normalizedOffset/1, 2);
                 }
                 else
                 {
-                    [view viewWithTag:kOverlayTag].alpha = 0.0f;
+                    overlay.alpha = 0.0f;
                 }
             }
         }
