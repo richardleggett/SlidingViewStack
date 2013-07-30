@@ -56,3 +56,7 @@ An example project has been included, but usage is similar to UITableView.
 	    	    
 	    return view;
 	}
+	
+License 
+--------------
+zlib (please see [LICENSE.md](https://github.com/richardleggett/SlidingViewStack/raw/master/LICENSE.md))
