@@ -25,7 +25,7 @@
     self.viewStack.delegate = self;
     self.viewStack.dataSource = self;
     self.viewStack.wrapEnabled = YES;
-    [self.view addSubview:_viewStack];
+    [self.view addSubview:self.viewStack];
     
     // try out some auto-scroll
 //    [self.viewStack scrollByNumberOfItems:5 duration:5.0];
