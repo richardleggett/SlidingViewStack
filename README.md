@@ -20,6 +20,12 @@ ARC Compatibility
 
 SlidingViewStack was designed to be used with ARC enabled.
 
+iOS Versions
+-------------
+
+SlidingViewStack was designed to run on iOS 6.
+It has been tested to work on iOS 7 beta 4.
+
 Sample Usage
 --------------
 
