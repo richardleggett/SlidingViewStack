@@ -46,6 +46,12 @@
     if(!view) {
         label = [[UILabel alloc] initWithFrame:self.view.bounds];
         view = label;
+    
+        UIButton *button =  [UIButton buttonWithType:UIButtonTypeRoundedRect];;
+        button.frame = CGRectMake(self.view.bounds.size.width/2-50, self.view.bounds.size.height-100, 100, 50);
+        [button setTitle:@"Back to 0" forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(handleButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        [view addSubview:button];
     } else {
         label = (UILabel*)view;
     }
@@ -53,12 +59,6 @@
     label.text = [NSString stringWithFormat:@"%d", index];
     label.textAlignment = NSTextAlignmentCenter;
     label.font = [label.font fontWithSize:50];
-    
-    UIButton *button =  [UIButton buttonWithType:UIButtonTypeRoundedRect];;
-    button.frame = CGRectMake(self.view.bounds.size.width/2-50, self.view.bounds.size.height-100, 100, 50);
-    [button setTitle:@"Back to 0" forState:UIControlStateNormal];
-    [button addTarget:self action:@selector(handleButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [view addSubview:button];
     
     view.userInteractionEnabled = YES;
     

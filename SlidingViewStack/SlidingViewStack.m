@@ -20,6 +20,7 @@
 //  TODO: Allow swiping in both directions for horizontal and vertical
 //
 
+#import <QuartzCore/QuartzCore.h>
 #import "SlidingViewStack.h"
 
 // default value for snapDistance. If the current view is dragged further than snapDistance
@@ -35,6 +36,10 @@ static const float kDefaultScrollDecceleration = 5.0f;
 // default value for flingThreshold, the threshhold
 // at which we determine a drag to be a fling/flick when finger is released
 static const float kDefaultFlingThreshhold = 75.0f;
+
+// the index of the sub layer in the wrapper view
+static NSInteger const kSubViewMainIndex = 0;
+static NSInteger const kSubViewOverlayIndex = 1;
 
 
 @interface SlidingViewStack()
@@ -97,7 +102,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
     self.vertical = YES;
     self.darkenViewBehind = YES;
     self.allowScrollViaShortestRoute = YES;
-    self.itemViews = [[NSMutableDictionary alloc] init];
+    self.itemViews = [NSMutableDictionary dictionary];
     self.lastTouchPoint = CGPointZero;
     self.previousItemIndex = 0;
     self.currentItemIndex = 0;
@@ -154,7 +159,6 @@ static const float kDefaultFlingThreshhold = 75.0f;
 {
     [super layoutSubviews];
     [self updateLayout];
-    [self performSelectorOnMainThread:@selector(updateLayout) withObject:nil waitUntilDone:NO];
 }
 
 - (void)updateLayout
@@ -166,9 +170,10 @@ static const float kDefaultFlingThreshhold = 75.0f;
 
 - (void)setFrameForView:(UIView *)view atIndex:(NSInteger)index
 {
+    // make sure the view is not being animated on
     [UIView setAnimationsEnabled:NO];
 
-    BOOL isBeforeCurrentView = [self indexIsBeforeCurrentItemIndex:index];
+    BOOL isBeforeCurrentView = [self isIndexBeforeCurrentItemIndex:index];
     
     CGFloat x = 0, y = 0;
     if(self.vertical)
@@ -187,6 +192,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
         subview.frame = subviewFrame;
     }
     
+    // allow for animations
     [UIView setAnimationsEnabled:YES];
 }
 
@@ -202,7 +208,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
     return self.itemViews[@(index)];
 }
 
-- (BOOL)indexIsBeforeCurrentItemIndex:(NSInteger)index
+- (BOOL)isIndexBeforeCurrentItemIndex:(NSInteger)index
 {
     NSInteger currentNearestIndex = [self clampedOffset:roundf(self.scrollOffset)];
 
@@ -260,7 +266,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
     UIView *reuseView = [self dequeueItemView];
     UIView *itemView = [self.dataSource slidingViewStack:self
                                          viewForItemAtIndex:index
-                                                reusingView:[reuseView.subviews objectAtIndex:0]];
+                                             reusingView:reuseView.subviews[kSubViewMainIndex]];
     
     if(reuseView == nil)
     {
@@ -296,10 +302,10 @@ static const float kDefaultFlingThreshhold = 75.0f;
         overlay.alpha = 0.0f;
         [viewWrapper addSubview:overlay];
     }
-    UIView *overlay = [viewWrapper.subviews objectAtIndex:1];
+    UIView *overlay = viewWrapper.subviews[kSubViewOverlayIndex];
     overlay.alpha = 0.0f;
     
-    BOOL isBeforeCurrentView = [self indexIsBeforeCurrentItemIndex:index];
+    BOOL isBeforeCurrentView = [self isIndexBeforeCurrentItemIndex:index];
     if(isBeforeCurrentView)
     {
         [self addSubview:viewWrapper];
@@ -341,7 +347,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
     if (itemSize)
     {
         //calculate offset and bounds
-        CGFloat origin = self.vertical ? self.frame.origin.y: self.frame.origin.x;
+        CGFloat origin = self.vertical ? self.frame.origin.y : self.frame.origin.x;
         
         //calculate the index of views showing on screen
         CGFloat currentOffset = [self clampedOffset:self.scrollOffset - origin / itemSize];
@@ -349,9 +355,9 @@ static const float kDefaultFlingThreshhold = 75.0f;
         //we assume there are always 3 "visible" items at any time, previous, current view and next
         NSInteger startIndex = roundf(currentOffset);
         NSArray *visibleIndices = @[
-                                    [NSNumber numberWithInt:[self clampedIndex:startIndex-1]],
-                                    [NSNumber numberWithInt:[self clampedIndex:startIndex]],
-                                    [NSNumber numberWithInt:[self clampedIndex:startIndex+1]]
+                                    @([self clampedIndex:startIndex-1]),
+                                    @([self clampedIndex:startIndex]),
+                                    @([self clampedIndex:startIndex+1])
                                 ];
         
         //remove offscreen views
@@ -435,7 +441,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
     if (itemViewSize)
     {
         //calculate offset and bounds
-        CGFloat origin = self.vertical ? self.frame.origin.y: self.frame.origin.x;
+        CGFloat origin = self.vertical ? self.frame.origin.y : self.frame.origin.x;
         
         //calculate indexes of the views showing on screen
         CGFloat scrollOffset = self.scrollOffset - origin / itemViewSize;
@@ -444,9 +450,9 @@ static const float kDefaultFlingThreshhold = 75.0f;
         
         //we assume there are up to 3 "visible" items at any time, previous, current view and next
         NSArray *visibleIndices = @[
-                                    [NSNumber numberWithInt:unclampedCurrentScrollIndex-1],
-                                    [NSNumber numberWithInt:unclampedCurrentScrollIndex],
-                                    [NSNumber numberWithInt:unclampedCurrentScrollIndex+1]
+                                    @(unclampedCurrentScrollIndex-1),
+                                    @(unclampedCurrentScrollIndex),
+                                    @(unclampedCurrentScrollIndex+1)
                                     ];
         
         for (NSNumber *number in visibleIndices)
@@ -484,8 +490,8 @@ static const float kDefaultFlingThreshhold = 75.0f;
             // adjust darken view overlays based on amount showing 
             if(self.darkenViewBehind)
             {
-                UIView *overlay = [view.subviews objectAtIndex:1];
-                if(unclampedIndex>unclampedCurrentScrollIndex)
+                UIView *overlay = view.subviews[kSubViewOverlayIndex];
+                if ( unclampedIndex>unclampedCurrentScrollIndex )
                 {
                     overlay.alpha = powf(normalizedOffset/1, 2);
                 }
