@@ -362,11 +362,15 @@ static NSInteger const kSubViewOverlayIndex = 1;
         
         //we assume there are always 3 "visible" items at any time, previous, current view and next
         NSInteger startIndex = roundf(clampedOffset);
-        NSArray *visibleIndices = @[
-                                    @([self clampedIndex:startIndex-1]),
-                                    @([self clampedIndex:startIndex]),
-                                    @([self clampedIndex:startIndex+1])
-                                ];
+        NSMutableArray *visibleIndices = [NSMutableArray array];
+        for(int i=startIndex-1; i<startIndex+2; i++)
+        {
+            int index = [self clampedIndex:i];
+            if(![visibleIndices containsObject:@(index)])
+            {
+                [visibleIndices addObject:@(index)];
+            }
+        }
         
         //remove offscreen views
         for (NSNumber *number in [self.itemViews allKeys])
