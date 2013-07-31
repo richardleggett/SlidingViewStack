@@ -20,7 +20,6 @@
 //  TODO: Allow swiping in both directions for horizontal and vertical
 //
 
-#import <QuartzCore/QuartzCore.h>
 #import "SlidingViewStack.h"
 
 // default value for snapDistance. If the current view is dragged further than snapDistance
