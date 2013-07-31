@@ -36,6 +36,9 @@ static const float kDefaultScrollDecceleration = 5.0f;
 // at which we determine a drag to be a fling/flick when finger is released
 static const float kDefaultFlingThreshhold = 75.0f;
 
+// minimum distance user must drag before we send slidingViewStackWillBeginStartDragging message
+static const float kDragMinimum = 4.0f;
+
 
 @interface SlidingViewStack()
 
@@ -56,6 +59,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, assign, getter = isFlinging) BOOL flinging;
 @property (nonatomic, assign, getter = isDragging) BOOL dragging;
+@property (nonatomic, assign) CGPoint startTouchPoint;
 @property (nonatomic, assign) CGPoint lastTouchPoint;
 @property (nonatomic, assign) NSTimeInterval lastTouchTime;
 
@@ -167,7 +171,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
 - (void)setFrameForView:(UIView *)view atIndex:(NSInteger)index
 {
     [UIView setAnimationsEnabled:NO];
-
+    
     BOOL isBeforeCurrentView = [self indexIsBeforeCurrentItemIndex:index];
     
     CGFloat x = 0, y = 0;
@@ -205,11 +209,11 @@ static const float kDefaultFlingThreshhold = 75.0f;
 - (BOOL)indexIsBeforeCurrentItemIndex:(NSInteger)index
 {
     NSInteger currentNearestIndex = [self clampedOffset:roundf(self.scrollOffset)];
-
+    
     
     return (index<currentNearestIndex && (index != 0 || currentNearestIndex != self.numberOfItems-1))
-            ||
-            (index>currentNearestIndex && currentNearestIndex == 0 && index == self.numberOfItems-1);
+    ||
+    (index>currentNearestIndex && currentNearestIndex == 0 && index == self.numberOfItems-1);
 }
 
 - (UIView *)currentItemView
@@ -259,8 +263,8 @@ static const float kDefaultFlingThreshhold = 75.0f;
     UIView *viewWrapper;
     UIView *reuseView = [self dequeueItemView];
     UIView *itemView = [self.dataSource slidingViewStack:self
-                                         viewForItemAtIndex:index
-                                                reusingView:[reuseView.subviews objectAtIndex:0]];
+                                      viewForItemAtIndex:index
+                                             reusingView:[reuseView.subviews objectAtIndex:0]];
     
     if(reuseView == nil)
     {
@@ -325,13 +329,13 @@ static const float kDefaultFlingThreshhold = 75.0f;
     else if (self.numberOfItems > 0)
     {
         UIView *view = self.itemViews[@(0)] ?:
-            [self.dataSource slidingViewStack:self viewForItemAtIndex:0 reusingView:[self dequeueItemView]];
+        [self.dataSource slidingViewStack:self viewForItemAtIndex:0 reusingView:[self dequeueItemView]];
         self.itemSize = view.frame.size;
     }
 }
 
 /**
- *	Called on initialization and on scroll to determine if new views need to be loaded, 
+ *	Called on initialization and on scroll to determine if new views need to be loaded,
  *  or any off-screen views unloaded (unloaded views are added to the re-use pool)
  */
 - (void)loadUnloadViews
@@ -352,7 +356,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
                                     [NSNumber numberWithInt:[self clampedIndex:startIndex-1]],
                                     [NSNumber numberWithInt:[self clampedIndex:startIndex]],
                                     [NSNumber numberWithInt:[self clampedIndex:startIndex+1]]
-                                ];
+                                    ];
         
         //remove offscreen views
         for (NSNumber *number in [self.itemViews allKeys])
@@ -365,7 +369,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
                 [self.itemViews removeObjectForKey:number];
             }
         }
-            
+        
         //add onscreen views
         for (NSNumber *number in visibleIndices)
         {
@@ -401,7 +405,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
     for (UIView *view in self.itemViews) {
         [view removeFromSuperview];
     }
-
+    
     //reset view pools
     self.itemViews = [NSMutableDictionary dictionary];
     self.itemViewPool = [NSMutableSet set];
@@ -438,9 +442,9 @@ static const float kDefaultFlingThreshhold = 75.0f;
         CGFloat origin = self.vertical ? self.frame.origin.y: self.frame.origin.x;
         
         //calculate indexes of the views showing on screen
-        CGFloat scrollOffset = self.scrollOffset - origin / itemViewSize;
+        CGFloat scrollOffset = self.scrollOffset;// - origin / itemViewSize;
         
-        NSInteger unclampedCurrentScrollIndex = floorf(scrollOffset);
+        NSInteger unclampedCurrentScrollIndex = [self clampedOffset:scrollOffset]<self.currentItemIndex ? ceilf(scrollOffset) : floorf(scrollOffset);
         
         //we assume there are up to 3 "visible" items at any time, previous, current view and next
         NSArray *visibleIndices = @[
@@ -481,19 +485,19 @@ static const float kDefaultFlingThreshhold = 75.0f;
             }
             view.frame = frame;
             
-            // adjust darken view overlays based on amount showing 
-            if(self.darkenViewBehind)
-            {
-                UIView *overlay = [view.subviews objectAtIndex:1];
-                if(unclampedIndex>unclampedCurrentScrollIndex)
-                {
-                    overlay.alpha = powf(normalizedOffset/1, 2);
-                }
-                else
-                {
-                    overlay.alpha = 0.0f;
-                }
-            }
+            // adjust darken view overlays based on amount showing
+//            if(self.darkenViewBehind)
+//            {
+//                UIView *overlay = [view.subviews objectAtIndex:1];
+//                if(unclampedIndex>unclampedCurrentScrollIndex)
+//                {
+//                    overlay.alpha = powf(normalizedOffset, 2);
+//                }
+//                else
+//                {
+//                    overlay.alpha = 0.0f;
+//                }
+//            }
         }
     }
 }
@@ -502,7 +506,6 @@ static const float kDefaultFlingThreshhold = 75.0f;
 
 - (void)didScroll
 {
-    //scroll views
     [self updateScrollOffset];
     
     if ([self.delegate respondsToSelector:@selector(slidingViewStackDidScroll:)])
@@ -532,7 +535,7 @@ static const float kDefaultFlingThreshhold = 75.0f;
         NSTimeInterval time = fminf(1.0f, (currentTime - self.scrollStartTime) / self.scrollDuration);
         CGFloat delta = (self.isFlinging) ? [self easeOut:time] : [self easeInOut:time];
         self.scrollOffset = [self clampedOffset:self.startOffset + (self.endOffset - self.startOffset) * delta];
-
+        
         [self didScroll];
         
         if (time == 1.0f)
@@ -747,37 +750,47 @@ static const float kDefaultFlingThreshhold = 75.0f;
     }
     self.lastTouchPoint = pt;
     
-    //stop scrolling animation
-    self.scrolling = NO;
-    self.flinging = NO;
+    // see if we've started dragging
+    CGFloat totalDragDistance = (self.vertical) ? self.startTouchPoint.y-pt.y : self.startTouchPoint.x-pt.x;
+    if(!self.dragging && fabsf(totalDragDistance)>kDragMinimum)
+    {
+        self.dragging = YES;
+        if ([self.delegate respondsToSelector:@selector(slidingViewStackWillBeginDragging:)])
+        {
+            [self.delegate slidingViewStackWillBeginDragging:self];
+        }
+    }
     
-    NSTimeInterval currentTime = [[NSDate date] timeIntervalSinceReferenceDate];
-    NSTimeInterval timeDiff = currentTime - self.lastTouchTime;
-    self.lastTouchTime = currentTime;
-
-    CGFloat delta = self.vertical ? dy : dx;
-    
-    // update scrollSpeed, points/sec
-    self.scrollSpeed = delta/timeDiff;
-    self.scrollSpeed /= self.scrollDecceleration;
-    self.scrollOffset += delta / (self.vertical ? self.itemSize.height : self.itemSize.width);
-    
-    //update view and call delegate
-    [self didScroll];
+    //scroll views
+    if(self.dragging)
+    {
+        //stop scrolling animation
+        self.scrolling = NO;
+        self.flinging = NO;
+        
+        NSTimeInterval currentTime = [[NSDate date] timeIntervalSinceReferenceDate];
+        NSTimeInterval timeDiff = currentTime - self.lastTouchTime;
+        self.lastTouchTime = currentTime;
+        
+        CGFloat delta = self.vertical ? dy : dx;
+        
+        // update scrollSpeed, points/sec
+        self.scrollSpeed = delta/timeDiff;
+        self.scrollSpeed /= self.scrollDecceleration;
+        self.scrollOffset += delta / (self.vertical ? self.itemSize.height : self.itemSize.width);
+        
+        //update view and call delegate
+        [self didScroll];
+    }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if ([self.delegate respondsToSelector:@selector(slidingViewStackWillBeginDragging:)])
-    {
-        [self.delegate slidingViewStackWillBeginDragging:self];
-    }
-    
     self.lastTouchTime = [[NSDate date] timeIntervalSinceReferenceDate];
-    self.dragging = YES;
+    self.startTouchPoint = [[touches  anyObject] locationInView:self];
+    self.scrollSpeed = 0.0f;
     self.scrolling = NO;
     self.flinging = NO;
-    self.scrollSpeed = 0.0f;
     
     [self didScroll];
 }
@@ -851,11 +864,14 @@ static const float kDefaultFlingThreshhold = 75.0f;
     
     // setting it back to zero so it doesn't get confused with the last point
     self.lastTouchPoint = CGPointZero;
-    self.dragging = NO;
     
-    if ([self.delegate respondsToSelector:@selector(slidingViewStackDidEndDragging:)])
+    if(self.dragging)
     {
-        [self.delegate slidingViewStackDidEndDragging:self];
+        self.dragging = NO;
+        if ([self.delegate respondsToSelector:@selector(slidingViewStackDidEndDragging:)])
+        {
+            [self.delegate slidingViewStackDidEndDragging:self];
+        }
     }
 }
 @end

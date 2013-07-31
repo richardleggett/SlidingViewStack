@@ -21,7 +21,10 @@
 
 - (void)viewDidAppear:(BOOL)animated
 {
-    self.viewStack = [[SlidingViewStack alloc] initWithFrame:self.view.bounds];
+    CGRect rect = self.view.bounds;
+    rect.size.height -= 100;
+    rect.origin.y += 100;
+    self.viewStack = [[SlidingViewStack alloc] initWithFrame:rect];
     self.viewStack.delegate = self;
     self.viewStack.dataSource = self;
     self.viewStack.wrapEnabled = YES;
@@ -44,7 +47,7 @@
     UILabel* label;
     
     if(!view) {
-        label = [[UILabel alloc] initWithFrame:self.view.bounds];
+        label = [[UILabel alloc] initWithFrame:self.viewStack.bounds];
         view = label;
     } else {
         label = (UILabel*)view;
