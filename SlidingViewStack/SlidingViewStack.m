@@ -332,8 +332,17 @@ static NSInteger const kSubViewOverlayIndex = 1;
     }
     else if (self.numberOfItems > 0)
     {
-        UIView *view = self.itemViews[@(0)] ?:
-        [self.dataSource slidingViewStack:self viewForItemAtIndex:0 reusingView:[self dequeueItemView]];
+        UIView *view;
+        if(self.itemViews.count>0)
+        {
+            view = ((UIView*)[self.itemViews allValues][0]).subviews[kSubViewMainIndex];
+        }
+        else
+        {
+            UIView *reuseView = self.itemViewPool.count>0 ? [self dequeueItemView].subviews[kSubViewMainIndex] : nil;
+            view = [self.dataSource slidingViewStack:self viewForItemAtIndex:0 reusingView:reuseView];
+        }
+        
         self.itemSize = view.frame.size;
     }
 }
