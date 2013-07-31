@@ -69,9 +69,10 @@
 
 // return a CGSize for each item View or leave unimplemented to use the view size from a view returned by
 // [viewStack slidingViewStack:viewStack viewForItemAtIndex:0 reusingView:nil]
-//- (CGSize)slidingViewStackItemSize:(SlidingViewStack *)viewStack
-//{
-//}
+- (CGSize)slidingViewStackItemSize:(SlidingViewStack *)viewStack
+{
+    return self.viewStack.bounds.size;
+}
 
 - (void)slidingViewStackDidScroll:(SlidingViewStack *)viewStack
 {

@@ -360,10 +360,10 @@ static NSInteger const kSubViewOverlayIndex = 1;
         //calculate the index of views showing on screen
         CGFloat clampedOffset = [self clampedOffset:self.scrollOffset];
         
-        //we assume there are always 3 "visible" items at any time, previous, current view and next
+        //we assume there are at most 3 "visible" items at any time, previous, current view and next
         NSInteger startIndex = roundf(clampedOffset);
         NSMutableArray *visibleIndices = [NSMutableArray array];
-        for(int i=startIndex-1; i<startIndex+2; i++)
+        for(int i=startIndex-1; i<=startIndex+1; i++)
         {
             int index = [self clampedIndex:i];
             if(![visibleIndices containsObject:@(index)])
@@ -591,13 +591,13 @@ static NSInteger const kSubViewOverlayIndex = 1;
 
 - (NSInteger)clampedIndex:(NSInteger)index
 {
+    if (self.numberOfItems == 0)
+    {
+        return 0;
+    }
+    
     if (self.wrapEnabled)
     {
-        if (self.numberOfItems == 0)
-        {
-            return 0;
-        }
-        
         if (index < 0) index += self.numberOfItems;
         return index%self.numberOfItems;
     }
