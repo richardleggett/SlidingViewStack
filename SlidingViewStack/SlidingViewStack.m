@@ -416,7 +416,9 @@ static NSInteger const kSubViewOverlayIndex = 1;
     self.flinging = NO;
     
     //remove old views
-    for (UIView *view in self.itemViews) {
+    for (NSNumber *key in self.itemViews)
+    {
+        UIView *view = self.itemViews[key];
         [view removeFromSuperview];
     }
     
@@ -427,6 +429,7 @@ static NSInteger const kSubViewOverlayIndex = 1;
     //layout views
     [self setNeedsLayout];
 }
+
 
 - (void)didMoveToSuperview
 {
