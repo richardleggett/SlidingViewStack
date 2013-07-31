@@ -21,10 +21,7 @@
 
 - (void)viewDidAppear:(BOOL)animated
 {
-    CGRect rect = self.view.bounds;
-    rect.size.height -= 100;
-    rect.origin.y += 100;
-    self.viewStack = [[SlidingViewStack alloc] initWithFrame:rect];
+    self.viewStack = [[SlidingViewStack alloc] initWithFrame:self.view.bounds];
     self.viewStack.delegate = self;
     self.viewStack.dataSource = self;
     self.viewStack.wrapEnabled = YES;
@@ -51,7 +48,7 @@
         view = label;
     
         UIButton *button =  [UIButton buttonWithType:UIButtonTypeRoundedRect];;
-        button.frame = CGRectMake(self.view.bounds.size.width/2-50, self.view.bounds.size.height-100, 100, 50);
+        button.frame = CGRectMake(self.viewStack.bounds.size.width/2-50, self.viewStack.bounds.size.height-100, 100, 50);
         [button setTitle:@"Back to 0" forState:UIControlStateNormal];
         [button addTarget:self action:@selector(handleButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         [view addSubview:button];

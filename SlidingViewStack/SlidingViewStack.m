@@ -215,7 +215,6 @@ static NSInteger const kSubViewOverlayIndex = 1;
 {
     NSInteger currentNearestIndex = [self clampedOffset:roundf(self.scrollOffset)];
     
-    
     return (index<currentNearestIndex && (index != 0 || currentNearestIndex != self.numberOfItems-1))
     ||
     (index>currentNearestIndex && currentNearestIndex == 0 && index == self.numberOfItems-1);
@@ -349,14 +348,11 @@ static NSInteger const kSubViewOverlayIndex = 1;
     CGFloat itemSize = self.vertical ? self.itemSize.height : self.itemSize.width;
     if (itemSize)
     {
-        //calculate offset and bounds
-        CGFloat origin = self.vertical ? self.frame.origin.y : self.frame.origin.x;
-        
         //calculate the index of views showing on screen
-        CGFloat currentOffset = [self clampedOffset:self.scrollOffset - origin / itemSize];
+        CGFloat clampedOffset = [self clampedOffset:self.scrollOffset];
         
         //we assume there are always 3 "visible" items at any time, previous, current view and next
-        NSInteger startIndex = roundf(currentOffset);
+        NSInteger startIndex = roundf(clampedOffset);
         NSArray *visibleIndices = @[
                                     @([self clampedIndex:startIndex-1]),
                                     @([self clampedIndex:startIndex]),
@@ -443,13 +439,10 @@ static NSInteger const kSubViewOverlayIndex = 1;
     CGFloat itemViewSize = self.vertical ? self.itemSize.height : self.itemSize.width;
     if (itemViewSize)
     {
-        //calculate offset and bounds
-        CGFloat origin = self.vertical ? self.frame.origin.y : self.frame.origin.x;
-        
         //calculate indexes of the views showing on screen
-        CGFloat scrollOffset = self.scrollOffset;// - origin / itemViewSize;
+        CGFloat scrollOffset = self.scrollOffset;
         
-        NSInteger unclampedCurrentScrollIndex = [self clampedOffset:scrollOffset]<self.currentItemIndex ? ceilf(scrollOffset) : floorf(scrollOffset);
+        NSInteger unclampedCurrentScrollIndex = floorf(scrollOffset);
         
         //we assume there are up to 3 "visible" items at any time, previous, current view and next
         NSArray *visibleIndices = @[
@@ -491,18 +484,18 @@ static NSInteger const kSubViewOverlayIndex = 1;
             view.frame = frame;
             
             // adjust darken view overlays based on amount showing
-//            if(self.darkenViewBehind)
-//            {
-//                UIView *overlay = [view.subviews objectAtIndex:1];
-//                if(unclampedIndex>unclampedCurrentScrollIndex)
-//                {
-//                    overlay.alpha = powf(normalizedOffset, 2);
-//                }
-//                else
-//                {
-//                    overlay.alpha = 0.0f;
-//                }
-//            }
+            if(self.darkenViewBehind)
+            {
+                UIView *overlay = [view.subviews objectAtIndex:kSubViewOverlayIndex];
+                if(unclampedIndex>unclampedCurrentScrollIndex)
+                {
+                    overlay.alpha = powf(normalizedOffset, 2);
+                }
+                else
+                {
+                    overlay.alpha = 0.0f;
+                }
+            }
         }
     }
 }
